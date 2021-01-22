@@ -67,7 +67,7 @@ mkdir code
 mkdir output
 
 cd /home/ubuntu
-wget http://download.pvln.nl/python/fastfood/code/show_selection_and_point_on_map_dynamic.py -O /home/ubuntu/plotlydash/code/the_code.py
+wget http://download.pvln.nl/python/fastfood/code/show_selection_and_point_on_map_dynamic.py -O /home/ubuntu/plotlydash/code/app.py
 wget http://download.pvln.nl/python/fastfood/output/_FastFood.csv -O /home/ubuntu/plotlydash/output/_FastFood.csv
 
 echo "#/bin/bash" >/home/ubuntu/start.sh
@@ -75,7 +75,7 @@ echo "# code assumes to be run from within plotlydash/code folder">>/home/ubuntu
 echo "cd /home/ubuntu/plotlydash/code">>/home/ubuntu/start.sh
 echo "ls -la">>/home/ubuntu/start.sh
 echo "/home/ubuntu/anaconda3/envs/ada38/bin/python3 --version">>/home/ubuntu/start.sh
-echo "/home/ubuntu/anaconda3/envs/ada38/bin/python3 the_code.py">>/home/ubuntu/start.sh
+echo "/home/ubuntu/anaconda3/envs/ada38/bin/python3 app.py">>/home/ubuntu/start.sh
 chmod +x start.sh
 
 # ++++++++++++ END  +++++++++++++
