@@ -139,7 +139,7 @@
         "IPHWSGILinuxServer": {
             "Type": "AWS::EC2::Instance",
             "Metadata": {
-                "Comment": "The Anaconda Data Analytics server in the linux subnet"
+                "Comment": "The WSGI server in the linux subnet"
             },
             "DependsOn": [
                 "IPHWSGILinuxRouteTable"
@@ -184,6 +184,14 @@
                         ]
                     }
                 },
+				"BlockDeviceMappings" : [
+					{
+					    "DeviceName" : "/dev/sda1",
+						"Ebs" : { 
+							"VolumeSize" : "16"
+	    				}
+					}
+				],
                 "NetworkInterfaces": [
                     {
                         "DeviceIndex": "0",
