@@ -1,0 +1,492 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Metadata": {},
+    "Parameters": {
+        "IPHWSGITemplateVersion": {
+            "Type": "String",
+            "Default": "v006",
+            "MinLength": "4",
+            "MaxLength": "4",
+            "Description": "Enter version number of template vXXX"
+        },
+        "IPHWSGIServerPrivateIP": {
+            "Description": "Private IP adress for server",
+            "Default": "10.0.1.5",
+            "Type": "String",
+            "ConstraintDescription": "Must be a valid private IP adresss in 10.0.1.0/24 range."
+        },
+        "IPHWSGIPlotlyDashPort": {
+            "Description": "Portnumber for communicating with Plotly Dash",
+            "Default": "8050",
+            "Type": "String",
+            "ConstraintDescription": "Must be a valid port number."
+        },
+        "IPHWSGIKeyName": {
+            "Description": "Name of an existing EC2 KeyPair",
+            "Default": "anaconda-data-analytics",
+            "Type": "AWS::EC2::KeyPair::KeyName",
+            "ConstraintDescription": "Must be the name of an existing EC2 KeyPair."
+        },
+        "IPHWSGIInstanceType": {
+            "Description": "Amazon EC2 instance type",
+            "Type": "String",
+            "Default": "t2.micro",
+            "AllowedValues": [
+                "t1.micro",
+                "t2.micro",
+                "t2.small",
+                "t2.medium",
+                "m1.small",
+                "m1.medium",
+                "m1.large",
+                "m1.xlarge",
+                "m2.xlarge",
+                "m2.2xlarge",
+                "m2.4xlarge",
+                "m3.medium",
+                "m3.large",
+                "m3.xlarge",
+                "m3.2xlarge",
+                "m4.large",
+                "m4.xlarge",
+                "m4.2xlarge",
+                "m4.4xlarge",
+                "m4.10xlarge",
+                "c1.medium",
+                "c1.xlarge",
+                "c3.large",
+                "c3.xlarge",
+                "c3.2xlarge",
+                "c3.4xlarge",
+                "c3.8xlarge",
+                "c4.large",
+                "c4.xlarge",
+                "c4.2xlarge",
+                "c4.4xlarge",
+                "c4.8xlarge",
+                "g2.2xlarge",
+                "r3.large",
+                "r3.xlarge",
+                "r3.2xlarge",
+                "r3.4xlarge",
+                "r3.8xlarge",
+                "i2.xlarge",
+                "i2.2xlarge",
+                "i2.4xlarge",
+                "i2.8xlarge",
+                "d2.xlarge",
+                "d2.2xlarge",
+                "d2.4xlarge",
+                "d2.8xlarge",
+                "hi1.4xlarge",
+                "hs1.8xlarge",
+                "cr1.8xlarge",
+                "cc2.8xlarge",
+                "cg1.4xlarge"
+            ],
+            "ConstraintDescription": "must be a valid EC2 instance type."
+        }
+    },
+    "Resources": {
+        "IPHWSGIMainVPC": {
+            "Type": "AWS::EC2::VPC",
+            "Properties": {
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "IPHWSGI_MainVPC"
+                    },
+                    {
+                        "Key": "Version",
+                        "Value": {
+                            "Ref": "IPHWSGITemplateVersion"
+                        }
+                    }
+                ],
+                "EnableDnsSupport": "true",
+                "EnableDnsHostnames": "true",
+                "CidrBlock": "10.0.0.0/16",
+                "InstanceTenancy": "default"
+            },
+            "Metadata": {
+                "Comment": "VPC container waar alles in komt"
+            }
+        },
+        "IPHWSGILinuxSubnet": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "IPHWSGI_LinuxSubnet"
+                    },
+                    {
+                        "Key": "Version",
+                        "Value": {
+                            "Ref": "IPHWSGITemplateVersion"
+                        }
+                    }
+                ],
+                "CidrBlock": "10.0.1.0/24",
+                "VpcId": {
+                    "Ref": "IPHWSGIMainVPC"
+                }
+            },
+            "Metadata": {
+                "Comment": "Linux Subnet, with access to Internet"
+            }
+        },
+        "IPHWSGILinuxServer": {
+            "Type": "AWS::EC2::Instance",
+            "Metadata": {
+                "Comment": "The Anaconda Data Analytics server in the linux subnet"
+            },
+            "DependsOn": [
+                "IPHWSGILinuxRouteTable"
+            ],
+            "Properties": {
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "IPHWSGI_LinuxServer"
+                    },
+                    {
+                        "Key": "Version",
+                        "Value": {
+                            "Ref": "IPHWSGITemplateVersion"
+                        }
+                    }
+                ],
+                "InstanceType": {
+                    "Ref": "IPHWSGIInstanceType"
+                },
+                "KeyName": {
+                    "Ref": "IPHWSGIKeyName"
+                },
+                "ImageId": "ami-0b90a8636b6f955c1",
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "#!/bin/bash -xe\n",
+                                "touch /home/ubuntu/start_of_UserData.txt\n",
+                                "sudo apt-get update\n",
+                                "sudo apt-get upgrade -y\n",
+								"touch /home/ubuntu/getting_install.txt\n",
+                                "wget -O /home/ubuntu/install.sh \"https://raw.githubusercontent.com/pierre-pvln/aws-cfn-wsgi/master/install-wsgi-plotly-dash.sh\"\n",
+                                "chmod +x /home/ubuntu/install.sh\n",
+								"touch /home/ubuntu/running_install.txt\n",
+                                "sudo /home/ubuntu/install.sh\n",
+								"chown -R ubuntu:ubuntu /home/ubuntu\n",
+                                "touch /home/ubuntu/end_of_UserData.txt\n"
+                            ]
+                        ]
+                    }
+                },
+                "NetworkInterfaces": [
+                    {
+                        "DeviceIndex": "0",
+                        "Description": "Primary network interface",
+                        "SubnetId": {
+                            "Ref": "IPHWSGILinuxSubnet"
+                        },
+                        "PrivateIpAddress": {
+                            "Ref": "IPHWSGIServerPrivateIP"
+                        },
+                        "AssociatePublicIpAddress": "true",
+                        "GroupSet": [
+                            {
+                                "Ref": "IPHWSGILinuxBaselineSecurityGroup"
+                            },
+                            {
+                                "Ref": "IPHWSGIPlotlyDashSecurityGroup"
+                            },
+                            {
+                                "Ref": "IPHWSGIDebugSecurityGroup"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        "IPHWSGILinuxBaselineSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "IPHWSGI_LinuxBaselineSecurityGroup"
+                    },
+                    {
+                        "Key": "Version",
+                        "Value": {
+                            "Ref": "IPHWSGITemplateVersion"
+                        }
+                    }
+                ],
+                "GroupDescription": "Enable SSH access",
+                "GroupName": "IPHWSGI_LinuxBaseline",
+                "SecurityGroupIngress": [
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "22",
+                        "ToPort": "22",
+                        "CidrIp": "86.81.35.18/32",
+                        "Description": "SSH direct from homenetwork"
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "IPHWSGIMainVPC"
+                }
+            },
+            "Metadata": {
+                "Comment": "Security group baseline for Linux instances"
+            }
+        },
+        "IPHWSGIPlotlyDashSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "IPHWSGI_PlotlyDashSecurityGroup"
+                    },
+                    {
+                        "Key": "Version",
+                        "Value": {
+                            "Ref": "IPHWSGITemplateVersion"
+                        }
+                    }
+                ],
+                "GroupDescription": "Enable access to Plotly Dash server",
+                "GroupName": "IPHWSGI_PlotlyDash",
+                "SecurityGroupIngress": [
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": {
+                            "Ref": "IPHWSGIPlotlyDashPort"
+                        },
+                        "ToPort": {
+                            "Ref": "IPHWSGIPlotlyDashPort"
+                        },
+                        "CidrIp": "86.81.35.18/32",
+                        "Description": "Access from homenetwork"
+                    },
+					{
+                        "IpProtocol": "tcp",
+                        "FromPort": {
+                            "Ref": "IPHWSGIPlotlyDashPort"
+                        },
+                        "ToPort": {
+                            "Ref": "IPHWSGIPlotlyDashPort"
+                        },
+                        "CidrIp": "0.0.0.0/0",
+                        "Description": "Access from everywhere"
+                    }
+ 
+                ],
+                "VpcId": {
+                    "Ref": "IPHWSGIMainVPC"
+                }
+            },
+            "Metadata": {
+                "Comment": "Security group for Plotly Dash"
+            }
+        },
+		
+        "IPHWSGIDebugSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "IPHWSGI_DebugSecurityGroup"
+                    },
+                    {
+                        "Key": "Version",
+                        "Value": {
+                            "Ref": "IPHWSGITemplateVersion"
+                        }
+                    }
+                ],
+                "GroupDescription": "Debug all",
+                "GroupName": "IPHWSGI_Debug",
+                "SecurityGroupIngress": [
+                    {
+                        "IpProtocol": -1,
+                        "FromPort": -1,
+                        "ToPort": -1,
+                        "CidrIp": "10.0.0.0/8",
+                        "Description": "From within VPCs / private IP ranges"
+                    },
+                    {
+                        "IpProtocol": -1,
+                        "FromPort": -1,
+                        "ToPort": -1,
+                        "CidrIp": "172.16.0.0/12",
+                        "Description": "From within VPCs / private IP ranges"
+                    },
+                    {
+                        "IpProtocol": -1,
+                        "FromPort": -1,
+                        "ToPort": -1,
+                        "CidrIp": "192.168.0.0/16",
+                        "Description": "From within VPCs / private IP ranges"
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "IPHWSGIMainVPC"
+                }
+            },
+            "Metadata": {
+                "Comment": "Security group baseline for debug purposes"
+            }
+        },
+        "IPHWSGILinuxRouteTable": {
+            "Type": "AWS::EC2::RouteTable",
+            "DependsOn": [
+                "IPHWSGIInetgw",
+                "IPHWSGILinuxSubnet"
+            ],
+            "Properties": {
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "IPHWSGI_LinuxRouteTable"
+                    },
+                    {
+                        "Key": "Version",
+                        "Value": {
+                            "Ref": "IPHWSGITemplateVersion"
+                        }
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "IPHWSGIMainVPC"
+                }
+            },
+            "Metadata": {
+                "Comment": "Basic route table for Linux Subnet"
+            }
+        },
+        "IPHWSGILinuxRouteToInternet": {
+            "Type": "AWS::EC2::Route",
+            "DependsOn": [
+                "IPHWSGIInetgw",
+                "IPHWSGILinuxSubnet"
+            ],
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "IPHWSGILinuxRouteTable"
+                },
+                "DestinationCidrBlock": "0.0.0.0/0",
+                "GatewayId": {
+                    "Ref": "IPHWSGIInetgw"
+                }
+            },
+            "Metadata": {
+                "Comment": "Route to internet from Linux"
+            }
+        },
+        "IPHWSGIInetgw": {
+            "Type": "AWS::EC2::InternetGateway",
+            "Properties": {
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "IPHWSGI_Inetgw"
+                    },
+                    {
+                        "Key": "Version",
+                        "Value": {
+                            "Ref": "IPHWSGITemplateVersion"
+                        }
+                    }
+                ]
+            },
+            "Metadata": {
+                "Comment": "Internet gateway"
+            }
+        },
+        "IPHWSGIAttachementInetgw": {
+            "Type": "AWS::EC2::VPCGatewayAttachment",
+            "Properties": {
+                "InternetGatewayId": {
+                    "Ref": "IPHWSGIInetgw"
+                },
+                "VpcId": {
+                    "Ref": "IPHWSGIMainVPC"
+                }
+            },
+            "Metadata": {
+                "Comment": "Connection between Internet Gateway and Main VPC"
+            }
+        },
+        "IPHWSGILinuxSubnetRouteTableAssociation": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "IPHWSGILinuxRouteTable"
+                },
+                "SubnetId": {
+                    "Ref": "IPHWSGILinuxSubnet"
+                }
+            },
+            "Metadata": {
+                "Comment": "Route Table for Linux Subnet"
+            }
+        },
+        "IPHWSGIDHCPOptions": {
+            "Type": "AWS::EC2::DHCPOptions",
+            "Properties": {
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "IPHWSGI_DHCPOptions"
+                    },
+                    {
+                        "Key": "Version",
+                        "Value": {
+                            "Ref": "IPHWSGITemplateVersion"
+                        }
+                    }
+                ],
+                "DomainName": {
+                    "Fn::Sub": "${AWS::Region}.compute.internal"
+                },
+                "DomainNameServers": [
+                    "AmazonProvidedDNS"
+                ]
+            },
+            "Metadata": {
+                "Comment": "DHCP Settings"
+            }
+        },
+        "IPHWSGIVPCDHCPOptionsAssociation": {
+            "Type": "AWS::EC2::VPCDHCPOptionsAssociation",
+            "Properties": {
+                "DhcpOptionsId": {
+                    "Ref": "IPHWSGIDHCPOptions"
+                },
+                "VpcId": {
+                    "Ref": "IPHWSGIMainVPC"
+                }
+            },
+            "Metadata": {
+                "Comment": "Connection between DHCP settings and Main VPC"
+            }
+        }
+    },
+    "Outputs": {
+        "LinuxServerDNSname": {
+            "Description": "The DNS-name of the Linux server",
+            "Value": {
+                "Fn::GetAtt": [
+                    "IPHWSGILinuxServer",
+                    "PublicDnsName"
+                ]
+            }
+        }
+    }
+}

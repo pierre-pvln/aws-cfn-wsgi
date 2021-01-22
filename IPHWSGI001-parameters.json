@@ -1,0 +1,22 @@
+[
+  {
+    "ParameterKey": "IPHWSGITemplateVersion",
+    "ParameterValue": "v008"
+  },
+  {
+    "ParameterKey": "IPHWSGIServerPrivateIP",
+    "ParameterValue": "10.0.1.5"
+  },
+  {
+    "ParameterKey": "IPHWSGIPlotlyDashPort",
+    "ParameterValue": "8050"
+  },
+  {
+    "ParameterKey": "IPHWSGIKeyName",
+    "ParameterValue": "anaconda-data-analytics"
+  },
+  {
+    "ParameterKey": "IPHWSGIInstanceType",
+    "ParameterValue": "t2.micro"
+  } 
+]
