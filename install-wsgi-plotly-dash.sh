@@ -49,11 +49,12 @@ cd /home/ubuntu
 mkdir plotlydash
 cd plotlydash
 mkdir code
-mkdir output
+mkdir code/data/
 
 cd /home/ubuntu
 wget http://download.pvln.nl/python/fastfood/code/show_selection_and_point_on_map_dynamic.py -O /home/ubuntu/plotlydash/code/app.py
-wget http://download.pvln.nl/python/fastfood/output/_FastFood.csv -O /home/ubuntu/plotlydash/output/_FastFood.csv
+wget http://download.pvln.nl/python/fastfood/code/data/_FastFood.csv -O /home/ubuntu/plotlydash/code/data/_FastFood.csv
+wget http://download.pvln.nl/python/fastfood/code/data/_Municipality.csv -O /home/ubuntu/plotlydash/code/data/_Municipality.csv
 
 echo "#/bin/bash" >/home/ubuntu/start.sh
 echo "# code assumes to be run from within plotlydash/code folder">>/home/ubuntu/start.sh
@@ -62,6 +63,17 @@ echo "ls -la">>/home/ubuntu/start.sh
 echo "/home/ubuntu/anaconda3/envs/wsgi38/bin/python3 --version">>/home/ubuntu/start.sh
 echo "/home/ubuntu/anaconda3/envs/wsgi38/bin/python3 app.py">>/home/ubuntu/start.sh
 chmod +x start.sh
+
+# based on https://ldnicolasmay.medium.com/deploying-a-free-dash-open-source-app-from-a-docker-container-with-gunicorn-3f426b5fd5df
+#
+echo "#/bin/bash" >/home/ubuntu/gunicorn.sh
+echo "# code assumes to be run from within plotlydash/code folder">>/home/ubuntu/gunicorn.sh
+echo "cd /home/ubuntu/plotlydash/code">>/home/ubuntu/gunicorn.sh
+echo "ls -la">>/home/ubuntu/gunicorn.sh
+echo "/home/ubuntu/anaconda3/envs/wsgi38/bin/gunicorn --version">>/home/ubuntu/gunicorn.sh
+echo "/home/ubuntu/anaconda3/envs/wsgi38/bin/gunicorn -w 2 -b 0.0.0.0:8050 app:server">>/home/ubuntu/gunicorn.sh
+chmod +x gunicorn.sh
+
 # ++++++++++++++ END SETUP APP CODE +++++++++++++++
 
 # ++++++++++++ THE END  +++++++++++++
