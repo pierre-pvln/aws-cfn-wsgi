@@ -50,6 +50,7 @@ mkdir plotlydash
 cd plotlydash
 mkdir code
 mkdir code/data/
+sudo chown -R ubuntu:ubuntu plotlydash
 
 #cd /home/ubuntu
 #wget http://download.pvln.nl/python/fastfood/code/show_selection_and_point_on_map_dynamic.py -O /home/ubuntu/plotlydash/code/app.py
