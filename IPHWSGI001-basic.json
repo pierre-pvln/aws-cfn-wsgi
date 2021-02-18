@@ -179,7 +179,7 @@
 								"touch /home/ubuntu/running_install.txt\n",
                                 "sudo /home/ubuntu/install.sh\n",
 								"chown -R ubuntu:ubuntu /home/ubuntu\n",
-								"touch /home/ubuntu/IPHWSGI_server.txt\n"
+								"touch /home/ubuntu/IPHWSGI_server.txt\n",
                                 "touch /home/ubuntu/end_of_UserData.txt\n"
                             ]
                         ]

@@ -51,10 +51,10 @@ cd plotlydash
 mkdir code
 mkdir code/data/
 
-cd /home/ubuntu
-wget http://download.pvln.nl/python/fastfood/code/show_selection_and_point_on_map_dynamic.py -O /home/ubuntu/plotlydash/code/app.py
-wget http://download.pvln.nl/python/fastfood/code/data/_FastFood.csv -O /home/ubuntu/plotlydash/code/data/_FastFood.csv
-wget http://download.pvln.nl/python/fastfood/code/data/_Municipality.csv -O /home/ubuntu/plotlydash/code/data/_Municipality.csv
+#cd /home/ubuntu
+#wget http://download.pvln.nl/python/fastfood/code/show_selection_and_point_on_map_dynamic.py -O /home/ubuntu/plotlydash/code/app.py
+#wget http://download.pvln.nl/python/fastfood/code/data/_FastFood.csv -O /home/ubuntu/plotlydash/code/data/_FastFood.csv
+#wget http://download.pvln.nl/python/fastfood/code/data/_Municipality.csv -O /home/ubuntu/plotlydash/code/data/_Municipality.csv
 
 echo "#/bin/bash" >/home/ubuntu/start.sh
 echo "# code assumes to be run from within plotlydash/code folder">>/home/ubuntu/start.sh
