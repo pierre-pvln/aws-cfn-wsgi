@@ -1,7 +1,7 @@
 [
   {
     "ParameterKey": "IPHWSGITemplateVersion",
-    "ParameterValue": "v008"
+    "ParameterValue": "v001"
   },
   {
     "ParameterKey": "IPHWSGIServerPrivateIP",
